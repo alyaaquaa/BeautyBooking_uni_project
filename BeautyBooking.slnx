@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/Elementy rozwiązania/">
     <File Path="Dockerfile" />
+    <File Path="Dockerfile.blazor" />
   </Folder>
   <Project Path="BeautyBooking.Application/BeautyBooking.Application.csproj" />
   <Project Path="BeautyBooking.BlazorServer/BeautyBooking.BlazorServer.csproj" Id="2a536729-d701-4ac0-8edc-4f38d21f22df" />
