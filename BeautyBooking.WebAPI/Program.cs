@@ -27,7 +27,7 @@ builder.Services.AddFluentValidationAutoValidation();
 // BAZA DANYCH SQLITE
 builder.Services.AddDbContext<BeautyBookingDbContext>(options =>
     options.UseSqlite(
-        "Data Source=C:/Users/alyaa/Downloads/IiE/II SEMESTR/C/projekt/beautybooking.db"));
+        "Data Source=beautybooking.db"));
 
 
 // DEPENDENCY INJECTION
