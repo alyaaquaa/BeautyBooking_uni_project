@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ch1seL.Blazored.LocalStorage.Concurrent" Version="0.0.4" />
+    <PackageReference Include="GreatIdeas.Blazored.FluentValidation" Version="3.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.23" />
+    <PackageReference Include="Radzen.Blazor" Version="10.4.9" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BeautyBooking.Application\BeautyBooking.Application.csproj" />
+    <ProjectReference Include="..\BeautyBooking.Domain\BeautyBooking.Domain.csproj" />
+    <ProjectReference Include="..\BeautyBooking.Infrastructure\BeautyBooking.Infrastructure.csproj" />
+    <ProjectReference Include="..\BeautyBooking.SharedKernel\BeautyBooking.SharedKernel.csproj" />
+  </ItemGroup>
+
+</Project>

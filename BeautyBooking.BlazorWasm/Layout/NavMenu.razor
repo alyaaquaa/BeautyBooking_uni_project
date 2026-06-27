@@ -1,0 +1,139 @@
+﻿@implements IDisposable
+
+@inject IAuthClientService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">BeautyBooking</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+
+        @if (AuthService.CurrentUser == null)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    Logowanie
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="register">
+                    Rejestracja
+                </NavLink>
+            </div>
+        }
+        else
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                    Dashboard
+                </NavLink>
+            </div>
+
+            @if (AuthService.CurrentUser.Role == "Employee")
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="service">
+                        Usługi
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="client">
+                        Klienci
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="employee">
+                        Pracownicy
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="reservation">
+                        Rezerwacje
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="payment">
+                        Płatności
+                    </NavLink>
+                </div>
+            }
+            @if (AuthService.CurrentUser.Role == "Client")
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="service">
+                        Usługi
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="reservation">
+                        Moje rezerwacje
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="payment">
+                        Moje płatności
+                    </NavLink>
+                </div>
+
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="client">
+                        Moje dane
+                    </NavLink>
+                </div>
+            }
+
+            <div class="nav-item px-3">
+                <button class="btn btn-danger mt-3" @onclick="Logout">
+                    Wyloguj
+                </button>
+            </div>
+        }
+
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnChange += Refresh;
+    }
+
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.Logout();
+        NavigationManager.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnChange -= Refresh;
+    }
+}

@@ -1,0 +1,36 @@
+﻿@page "/reservation/details/{Id:int}"
+
+@inject IReservationClientService ReservationService
+@inject NavigationManager NavigationManager
+
+<h3>Szczegóły rezerwacji</h3>
+
+@if (reservation == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <p><strong>Klient ID:</strong> @reservation.ClientId</p>
+    <p><strong>Pracownik ID:</strong> @reservation.EmployeeId</p>
+    <p><strong>Usługi:</strong> @string.Join(", ", reservation.ServiceNames)</p>
+    <p><strong>Data:</strong> @reservation.ReservationDate.ToString("yyyy-MM-dd HH:mm")</p>
+    <p><strong>Status:</strong> @reservation.Status</p>
+    <p><strong>Uwagi:</strong> @reservation.Notes</p>
+
+    <button class="btn btn-secondary" @onclick="Back">Powrót</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ReservationDto? reservation;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservation = await ReservationService.GetByIdAsync(Id);
+    }
+
+    private void Back() => NavigationManager.NavigateTo("/reservation");
+}

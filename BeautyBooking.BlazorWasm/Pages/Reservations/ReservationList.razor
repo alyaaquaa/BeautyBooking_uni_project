@@ -1,0 +1,92 @@
+﻿@page "/reservation"
+
+@inject IReservationClientService ReservationService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IAuthClientService AuthService
+
+<h3>Lista rezerwacji</h3>
+
+<a href="/reservation/create" class="btn btn-primary mb-3">Dodaj rezerwację</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Klient ID</th>
+            <th>Pracownik ID</th>
+            <th>Usługa ID</th>
+            <th>Data</th>
+            <th>Status</th>
+            <th>Uwagi</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var reservation in reservations)
+        {
+            <tr>
+                <td>@reservation.ClientId</td>
+                <td>@reservation.EmployeeId</td>
+                <td>@string.Join(", ", reservation.ServiceNames)</td>
+                <td>@reservation.ReservationDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@reservation.Status</td>
+                <td>@reservation.Notes</td>
+                <td>
+                    <button class="btn btn-info btn-sm" @onclick="() => Details(reservation.Id)">Szczegóły</button>
+                    <button class="btn btn-warning btn-sm" @onclick="() => Edit(reservation.Id)">Edytuj</button>
+                    <button class="btn btn-danger btn-sm"
+                            @onclick="() => ConfirmDelete(reservation.Id)">
+                        Usuń
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private IEnumerable<ReservationDto> reservations = new List<ReservationDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ReservationService.GetAllAsync();
+        var allReservations = await ReservationService.GetAllAsync();
+
+        if (AuthService.CurrentUser?.Role == "Client")
+        {
+            reservations = allReservations
+                .Where(r => r.ClientId == AuthService.CurrentUser.ClientId)
+                .ToList();
+        }
+        else
+        {
+            reservations = allReservations;
+        }
+    }
+
+    private void Details(int id) => NavigationManager.NavigateTo($"/reservation/details/{id}");
+
+    private void Edit(int id) => NavigationManager.NavigateTo($"/reservation/edit/{id}");
+
+    private async Task ConfirmDelete(int id)
+    {
+        bool result = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Czy na pewno chcesz usunąć rekord?"
+        );
+
+        if (result)
+        {
+            await Delete(id);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        await ReservationService.DeleteAsync(id);
+
+        reservations = await ReservationService.GetAllAsync();
+
+        StateHasChanged();
+    }
+}

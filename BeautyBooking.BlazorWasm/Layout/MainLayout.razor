@@ -1,0 +1,56 @@
+﻿@inherits LayoutComponentBase
+@implements IDisposable
+
+@inject IAuthClientService AuthService
+@inject NavigationManager NavigationManager
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            @if (AuthService.CurrentUser != null)
+            {
+                <span>
+                    Zalogowano: @AuthService.CurrentUser.FullName (@AuthService.CurrentUser.Role)
+                </span>
+            }
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        AuthService.OnChange += Refresh;
+
+        await AuthService.InitializeAsync();
+
+        var relativeUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+
+        bool isAuthPage =
+            relativeUrl.StartsWith("login") ||
+            relativeUrl.StartsWith("register");
+
+        if (AuthService.CurrentUser == null && !isAuthPage)
+        {
+            NavigationManager.NavigateTo("/login");
+        }
+    }
+
+    private void Refresh()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnChange -= Refresh;
+    }
+}

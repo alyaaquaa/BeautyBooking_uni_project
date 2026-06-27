@@ -1,0 +1,34 @@
+﻿@page "/client/details/{Id:int}"
+
+@inject IClientClientService ClientService
+@inject NavigationManager NavigationManager
+
+<h3>Szczegóły klienta</h3>
+
+@if (client == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <p><strong>Imię:</strong> @client.FirstName</p>
+    <p><strong>Nazwisko:</strong> @client.LastName</p>
+    <p><strong>Email:</strong> @client.Email</p>
+    <p><strong>Telefon:</strong> @client.PhoneNumber</p>
+
+    <button class="btn btn-secondary" @onclick="Back">Powrót</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ClientDto? client;
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = await ClientService.GetByIdAsync(Id);
+    }
+
+    private void Back() => NavigationManager.NavigateTo("/client");
+}

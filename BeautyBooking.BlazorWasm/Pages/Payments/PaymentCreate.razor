@@ -1,0 +1,103 @@
+﻿@page "/payment/create"
+
+@inject IPaymentClientService PaymentService
+@inject IReservationClientService ReservationService
+@inject NavigationManager NavigationManager
+
+<h3>Dodaj płatność</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="model" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Rezerwacja</label>
+        <InputSelect class="form-control" @bind-Value="model.ReservationId">
+            <option value="0">-- wybierz rezerwację --</option>
+            @foreach (var reservation in reservations)
+            {
+                <option value="@reservation.Id">
+                    Rezerwacja #@reservation.Id - @reservation.ReservationDate.ToString("yyyy-MM-dd") - @reservation.Status
+                </option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label>Kwota</label>
+        <InputNumber class="form-control" @bind-Value="model.Amount" />
+    </div>
+
+    <div class="mb-3">
+        <label>Data płatności</label>
+        <InputDate class="form-control" @bind-Value="model.PaymentDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>Metoda płatności</label>
+        <InputSelect class="form-control" @bind-Value="model.PaymentMethod">
+            <option value="">-- wybierz metodę --</option>
+            <option value="Gotówka">Gotówka</option>
+            <option value="Karta">Karta</option>
+            <option value="Przelew">Przelew</option>
+            <option value="BLIK">BLIK</option>
+        </InputSelect>
+    </div>
+
+    <div class="mb-3 form-check">
+        <InputCheckbox class="form-check-input" @bind-Value="model.IsPaid" />
+        <label class="form-check-label">Opłacone</label>
+    </div>
+
+    <button class="btn btn-success" type="submit">Zapisz</button>
+    <a href="/payment" class="btn btn-secondary ms-2">Anuluj</a>
+</EditForm>
+
+@code {
+    private CreatePaymentDto model = new()
+    {
+        PaymentDate = DateTime.Now,
+        PaymentMethod = "Gotówka",
+        IsPaid = true
+    };
+
+    private IEnumerable<ReservationDto> reservations = new List<ReservationDto>();
+
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allReservations = await ReservationService.GetAllAsync();
+        var allPayments = await PaymentService.GetAllAsync();
+
+        var paidReservationIds = allPayments
+            .Select(p => p.ReservationId)
+            .ToList();
+
+        reservations = allReservations
+            .Where(r => !paidReservationIds.Contains(r.Id))
+            .ToList();
+
+        model.PaymentDate = DateTime.Now;
+        model.PaymentMethod = "Gotówka";
+        model.IsPaid = true;
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            await PaymentService.CreateAsync(model);
+            NavigationManager.NavigateTo("/payment");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,14 @@
+﻿using BeautyBooking.Domain.Models;
+using BeautyBooking.Domain.Contracts;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace BeautyBooking.Domain.Contracts
+{
+    public interface IEmployeeRepository : IRepository<Employee>
+    {
+    }
+}

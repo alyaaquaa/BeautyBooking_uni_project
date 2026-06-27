@@ -1,0 +1,76 @@
+﻿@page "/employee"
+
+@inject IEmployeeClientService EmployeeService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IAuthClientService AuthService
+
+<h3>Lista pracowników</h3>
+
+<a href="/employee/create" class="btn btn-primary mb-3">Dodaj pracownika</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Stanowisko</th>
+            <th>Email</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var employee in employees)
+        {
+            <tr>
+                <td>@employee.FirstName</td>
+                <td>@employee.LastName</td>
+				<td>@employee.Email</td>
+                <td>@employee.Position</td>
+                <td>
+                    <button class="btn btn-info btn-sm" @onclick="() => Details(employee.Id)">Szczegóły</button>
+                    <button class="btn btn-warning btn-sm" @onclick="() => Edit(employee.Id)">Edytuj</button>
+                    <button class="btn btn-danger btn-sm"
+                            @onclick="() => ConfirmDelete(employee.Id)">
+                        Usuń
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private IEnumerable<EmployeeDto> employees = new List<EmployeeDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        employees = await EmployeeService.GetAllAsync();
+    }
+
+    private void Details(int id) => NavigationManager.NavigateTo($"/employee/details/{id}");
+
+    private void Edit(int id) => NavigationManager.NavigateTo($"/employee/edit/{id}");
+
+    private async Task ConfirmDelete(int id)
+    {
+        bool result = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Czy na pewno chcesz usunąć rekord?"
+        );
+
+        if (result)
+        {
+            await Delete(id);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        await EmployeeService.DeleteAsync(id);
+
+        employees = await EmployeeService.GetAllAsync();
+
+        StateHasChanged();
+    }
+}

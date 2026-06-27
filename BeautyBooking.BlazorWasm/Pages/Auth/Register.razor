@@ -1,0 +1,110 @@
+﻿@page "/register"
+
+@inject IAuthClientService AuthService
+@inject NavigationManager NavigationManager
+
+<h3>Rejestracja</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="model" OnValidSubmit="RegisterUser">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Rola <span class="text-danger">*</span></label>
+        <InputSelect class="form-control" @bind-Value="model.Role">
+            <option value="">-- wybierz rolę --</option>
+            <option value="Client">Klient</option>
+            <option value="Employee">Pracownik</option>
+        </InputSelect>
+        <ValidationMessage For="@(() => model.Role)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Imię <span class="text-danger">*</span></label>
+        <InputText class="form-control" @bind-Value="model.FirstName" />
+        <ValidationMessage For="@(() => model.FirstName)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Nazwisko <span class="text-danger">*</span></label>
+        <InputText class="form-control" @bind-Value="model.LastName" />
+        <ValidationMessage For="@(() => model.LastName)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email <span class="text-danger">*</span></label>
+        <InputText class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="@(() => model.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Hasło <span class="text-danger">*</span></label>
+        <InputText class="form-control" type="password" @bind-Value="model.Password" />
+        <ValidationMessage For="@(() => model.Password)" />
+    </div>
+
+    @if (model.Role == "Client")
+    {
+        <div class="mb-3">
+            <label>Numer telefonu <span class="text-danger">*</span></label>
+            <InputText class="form-control" @bind-Value="model.PhoneNumber" />
+            <ValidationMessage For="@(() => model.PhoneNumber)" />
+        </div>
+    }
+
+    @if (model.Role == "Employee")
+    {
+        <div class="mb-3">
+            <label>Stanowisko <span class="text-danger">*</span></label>
+            <InputText class="form-control" @bind-Value="model.Position" />
+            <ValidationMessage For="@(() => model.Position)" />
+        </div>
+    }
+
+    <button type="submit" class="btn btn-success">Zarejestruj</button>
+
+    <a href="/login" class="btn btn-secondary ms-2">Mam już konto</a>
+</EditForm>
+
+@code {
+    private RegisterDto model = new();
+    private string? errorMessage;
+
+    private async Task RegisterUser()
+    {
+        try
+        {
+            errorMessage = null;
+
+            if (model.Role == "Client" && string.IsNullOrWhiteSpace(model.PhoneNumber))
+            {
+                errorMessage = "Numer telefonu jest wymagany dla klienta.";
+                return;
+            }
+
+            if (model.Role == "Employee" && string.IsNullOrWhiteSpace(model.Position))
+            {
+                errorMessage = "Stanowisko jest wymagane dla pracownika.";
+                return;
+            }
+
+            var user = await AuthService.RegisterAsync(model);
+
+            if (user == null)
+            {
+                errorMessage = "Nie udało się zarejestrować użytkownika.";
+                return;
+            }
+
+            NavigationManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

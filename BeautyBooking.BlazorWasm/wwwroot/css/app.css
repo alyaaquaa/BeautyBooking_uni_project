@@ -1,0 +1,70 @@
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #fff8f6;
+}
+
+h1, h2, h3, h4, h5 {
+    color: #c97b63;
+}
+
+a, .btn-link {
+    color: #d67f6d;
+}
+
+.btn-primary {
+    color: white;
+    background-color: #e89b8a;
+    border-color: #e89b8a;
+}
+
+    .btn-primary:hover {
+        background-color: #d98b7b;
+        border-color: #d98b7b;
+    }
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #f4b6a6;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+.card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+}
+
+.card-body h2 {
+    color: #e89b8a;
+    font-weight: bold;
+}
+
+.valid.modified:not([type=checkbox]) {
+    outline: 1px solid #7ecb9b;
+}
+
+.invalid {
+    outline: 1px solid #dc3545;
+}
+
+.validation-message {
+    color: #dc3545;
+}
+
+.loading-progress circle:last-child {
+    stroke: #e89b8a;
+}
+
+.loading-progress-text {
+    color: #c97b63;
+}
+
+code {
+    color: #c97b63;
+}

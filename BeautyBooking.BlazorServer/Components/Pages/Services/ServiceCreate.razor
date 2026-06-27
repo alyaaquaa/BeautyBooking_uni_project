@@ -1,0 +1,66 @@
+﻿@page "/service/create"
+
+@using BeautyBooking.SharedKernel.Dto
+@using BeautyBooking.Application.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject IServiceService ServiceService
+@inject NavigationManager NavigationManager
+
+<h3>Dodaj usługę</h3>
+
+<EditForm Model="service"
+          OnValidSubmit="Create">
+
+    <Blazored.FluentValidation.FluentValidationValidator />
+    <ValidationSummary />
+
+    
+
+
+    <div class="mb-3">
+        <label>Nazwa</label>
+        <InputText class="form-control"
+                   @bind-Value="service.Name" />
+        <ValidationMessage For="@(() => service.Name)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Opis</label>
+        <InputText class="form-control"
+                   @bind-Value="service.Description" />
+        <ValidationMessage For="@(() => service.Description)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Cena</label>
+        <InputNumber class="form-control"
+                     @bind-Value="service.Price" />
+        <ValidationMessage For="@(() => service.Price)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Czas trwania</label>
+        <InputNumber class="form-control"
+                     @bind-Value="service.DurationMinutes" />
+        <ValidationMessage For="@(() => service.DurationMinutes)" />
+    </div>
+
+    <button class="btn btn-success"
+            type="submit">
+        Zapisz
+    </button>
+
+</EditForm>
+
+@code {
+
+    private CreateServiceDto service = new();
+
+    private async Task Create()
+    {
+        await ServiceService.CreateAsync(service);
+
+        NavigationManager.NavigateTo("/service");
+    }
+}

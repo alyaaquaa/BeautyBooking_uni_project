@@ -1,0 +1,86 @@
+﻿@page "/service/edit/{Id:int}"
+
+@using BeautyBooking.SharedKernel.Dto
+@using BeautyBooking.Application.Services
+@using Microsoft.AspNetCore.Components.Forms
+
+@inject IServiceService ServiceService
+@inject NavigationManager NavigationManager
+
+<h3>Edytuj usługę</h3>
+
+@if (service == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <EditForm Model="service" OnValidSubmit="Update">
+        <Blazored.FluentValidation.FluentValidationValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Nazwa</label>
+            <InputText class="form-control" @bind-Value="service.Name" />
+            <ValidationMessage For="@(() => service.Name)" />
+        </div>
+
+        <div class="mb-3">
+            <label>Opis</label>
+            <InputText class="form-control" @bind-Value="service.Description" />
+            <ValidationMessage For="@(() => service.Description)" />
+        </div>
+
+        <div class="mb-3">
+            <label>Cena</label>
+            <InputNumber class="form-control" @bind-Value="service.Price" />
+            <ValidationMessage For="@(() => service.Price)" />
+        </div>
+
+        <div class="mb-3">
+            <label>Czas trwania</label>
+            <InputNumber class="form-control" @bind-Value="service.DurationMinutes" />
+			<ValidationMessage For="@(() => service.DurationMinutes)" />
+        </div>
+
+        <button class="btn btn-success" type="submit">Zapisz zmiany</button>
+        <button class="btn btn-secondary" type="button" @onclick="Back">Powrót</button>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdateServiceDto? service;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var existing = await ServiceService.GetByIdAsync(Id);
+
+        if (existing != null)
+        {
+            service = new UpdateServiceDto
+            {
+                Name = existing.Name,
+                Description = existing.Description,
+                Price = existing.Price,
+                DurationMinutes = existing.DurationMinutes
+            };
+        }
+    }
+
+    private async Task Update()
+    {
+        if (service != null)
+        {
+            await ServiceService.UpdateAsync(Id, service);
+            NavigationManager.NavigateTo("/service");
+        }
+    }
+
+    private void Back()
+    {
+        NavigationManager.NavigateTo("/service");
+    }
+}

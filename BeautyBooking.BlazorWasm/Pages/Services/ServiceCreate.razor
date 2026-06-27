@@ -1,0 +1,54 @@
+﻿@page "/service/create"
+
+@using BeautyBooking.SharedKernel.Dto
+@using BeautyBooking.BlazorWasm.Services
+
+@inject IServiceClientService ServiceService
+@inject NavigationManager NavigationManager
+
+<h3>Dodaj usługę</h3>
+
+<EditForm Model="model" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Nazwa</label>
+        <InputText class="form-control" @bind-Value="model.Name" />
+    </div>
+
+    <div class="mb-3">
+        <label>Opis</label>
+        <InputText class="form-control" @bind-Value="model.Description" />
+    </div>
+
+    <div class="mb-3">
+        <label>Cena</label>
+        <InputNumber class="form-control" @bind-Value="model.Price" />
+    </div>
+
+    <div class="mb-3">
+        <label>Czas trwania (min)</label>
+        <InputNumber class="form-control" @bind-Value="model.DurationMinutes" />
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Zapisz
+    </button>
+
+    <a href="/service" class="btn btn-secondary ms-2">
+        Anuluj
+    </a>
+</EditForm>
+
+@code {
+
+    private CreateServiceDto model = new();
+
+    private async Task Create()
+    {
+        await ServiceService.CreateAsync(model);
+
+        NavigationManager.NavigateTo("/service");
+    }
+}

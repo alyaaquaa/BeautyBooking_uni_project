@@ -1,0 +1,112 @@
+﻿@page "/payment/edit/{Id:int}"
+
+@inject IPaymentClientService PaymentService
+@inject IReservationClientService ReservationService
+@inject NavigationManager NavigationManager
+
+<h3>Edytuj płatność</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (model == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="Update">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Rezerwacja</label>
+            <InputSelect class="form-control" @bind-Value="model.ReservationId">
+                <option value="0">-- wybierz rezerwację --</option>
+                @foreach (var reservation in reservations)
+                {
+                    <option value="@reservation.Id">
+                        Rezerwacja #@reservation.Id - @reservation.ReservationDate.ToString("yyyy-MM-dd") - @reservation.Status
+                    </option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="mb-3">
+            <label>Kwota</label>
+            <InputNumber class="form-control" @bind-Value="model.Amount" />
+        </div>
+
+        <div class="mb-3">
+            <label>Data płatności</label>
+            <InputDate class="form-control" @bind-Value="model.PaymentDate" />
+        </div>
+
+        <div class="mb-3">
+            <label>Metoda płatności</label>
+            <InputSelect class="form-control" @bind-Value="model.PaymentMethod">
+                <option value="">-- wybierz metodę --</option>
+                <option value="Gotówka">Gotówka</option>
+                <option value="Karta">Karta</option>
+                <option value="Przelew">Przelew</option>
+                <option value="BLIK">BLIK</option>
+            </InputSelect>
+        </div>
+
+        <div class="mb-3 form-check">
+            <InputCheckbox class="form-check-input" @bind-Value="model.IsPaid" />
+            <label class="form-check-label">Opłacone</label>
+        </div>
+
+        <button class="btn btn-success" type="submit">Zapisz</button>
+        <a href="/payment" class="btn btn-secondary ms-2">Anuluj</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdatePaymentDto? model;
+
+    private IEnumerable<ReservationDto> reservations = new List<ReservationDto>();
+
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ReservationService.GetAllAsync();
+
+        var payment = await PaymentService.GetByIdAsync(Id);
+
+        if (payment != null)
+        {
+            model = new UpdatePaymentDto
+            {
+                ReservationId = payment.ReservationId,
+                Amount = payment.Amount,
+                PaymentDate = payment.PaymentDate,
+                PaymentMethod = payment.PaymentMethod,
+                IsPaid = payment.IsPaid
+            };
+        }
+    }
+
+    private async Task Update()
+    {
+        if (model != null)
+        {
+            try
+            {
+                await PaymentService.UpdateAsync(Id, model);
+                NavigationManager.NavigateTo("/payment");
+            }
+            catch (Exception ex)
+            {
+                errorMessage = ex.Message;
+            }
+        }
+    }
+}

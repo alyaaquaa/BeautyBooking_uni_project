@@ -1,0 +1,84 @@
+﻿@page "/service"
+
+@inject IServiceClientService ServiceClientService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IAuthClientService AuthService
+
+<PageTitle>Usługi</PageTitle>
+
+<h3>Lista usług kosmetycznych — WebAssembly</h3>
+@if (AuthService.CurrentUser?.Role == "Employee")
+{
+    <a href="/service/create" class="btn btn-primary mb-3">Dodaj usługę</a>
+}
+
+@if (services == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var service in services)
+        {
+            <div class="card m-2" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title">@service.Name</h5>
+                    <p class="card-text">@service.Description</p>
+                    <p class="card-text">@service.Price zł</p>
+
+                    <button class="btn btn-primary"
+                            @onclick="() => Details(service.Id)">
+                        Szczegóły
+                    </button>
+                    @if (AuthService.CurrentUser?.Role == "Employee")
+                    {
+                        <button class="btn btn-warning btn-sm" @onclick="() => Edit(service.Id)">Edytuj</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(service.Id)">Usuń</button>
+                    }
+
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private IEnumerable<ServiceDto>? services;
+
+    protected override async Task OnInitializedAsync()
+    {
+        services = await ServiceClientService.GetAllAsync();
+    }
+
+    private void Details(int id)
+    {
+        NavigationManager.NavigateTo($"/service/details/{id}");
+    }
+    private void Edit(int id)
+    {
+        NavigationManager.NavigateTo($"/service/edit/{id}");
+    }
+    private async Task ConfirmDelete(int id)
+    {
+        bool result = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Czy na pewno chcesz usunąć rekord?"
+        );
+
+        if (result)
+        {
+            await Delete(id);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        await ServiceClientService.DeleteAsync(id);
+
+        services = await ServiceClientService.GetAllAsync();
+
+        StateHasChanged();
+    }
+}

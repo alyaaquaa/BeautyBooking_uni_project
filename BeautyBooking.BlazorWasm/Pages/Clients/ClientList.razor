@@ -1,0 +1,92 @@
+﻿@page "/client"
+
+@inject IClientClientService ClientService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IAuthClientService AuthService
+
+<h3>Lista klientów</h3>
+
+<a href="/client/create" class="btn btn-primary mb-3">Dodaj klienta</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Imię</th>
+            <th>Nazwisko</th>
+            <th>Email</th>
+            <th>Telefon</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var client in clients)
+        {
+            <tr>
+                <td>@client.FirstName</td>
+                <td>@client.LastName</td>
+                <td>@client.Email</td>
+                <td>@client.PhoneNumber</td>
+                <td>
+                    <button class="btn btn-info btn-sm" @onclick="() => Details(client.Id)">Szczegóły</button>
+                    <button class="btn btn-warning btn-sm" @onclick="() => Edit(client.Id)">Edytuj</button>
+                    @if (AuthService.CurrentUser?.Role == "Employee")
+                    {
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(client.Id)">
+                            Usuń
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private IEnumerable<ClientDto> clients = new List<ClientDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await ClientService.GetAllAsync();
+        var allClients = await ClientService.GetAllAsync();
+
+        if (AuthService.CurrentUser?.Role == "Client")
+        {
+            clients = allClients
+                .Where(c => c.Id == AuthService.CurrentUser.ClientId)
+                .ToList();
+        }
+        else
+        {
+            clients = allClients;
+        }
+    }
+
+    private void Details(int id) => NavigationManager.NavigateTo($"/client/details/{id}");
+
+    private void Edit(int id) => NavigationManager.NavigateTo($"/client/edit/{id}");
+
+    private async Task ConfirmDelete(int id)
+    {
+        bool result = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Czy na pewno chcesz usunąć rekord?"
+        );
+
+        if (result)
+        {
+            await Delete(id);
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        await ClientService.DeleteAsync(id);
+
+        clients = await ClientService.GetAllAsync();
+
+        StateHasChanged();
+    }
+
+
+}

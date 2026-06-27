@@ -1,0 +1,37 @@
+﻿@page "/employee/details/{Id:int}"
+
+@inject IEmployeeClientService EmployeeService
+@inject NavigationManager NavigationManager
+
+<h3>Szczegóły pracownika</h3>
+
+@if (employee == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <p><strong>Imię:</strong> @employee.FirstName</p>
+    <p><strong>Nazwisko:</strong> @employee.LastName</p>
+	<p><strong>Email:</strong> @employee.Email</p>
+    <p><strong>Stanowisko:</strong> @employee.Position</p>
+
+    <button class="btn btn-secondary" @onclick="Back">Powrót</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private EmployeeDto? employee;
+
+    protected override async Task OnInitializedAsync()
+    {
+        employee = await EmployeeService.GetByIdAsync(Id);
+    }
+
+    private void Back()
+    {
+        NavigationManager.NavigateTo("/employee");
+    }
+}

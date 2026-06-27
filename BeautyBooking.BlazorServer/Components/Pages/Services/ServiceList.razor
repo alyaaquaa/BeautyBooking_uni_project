@@ -1,0 +1,56 @@
+﻿@page "/service"
+
+@using BeautyBooking.SharedKernel.Dto
+@using BeautyBooking.Application.Services
+
+@inject IServiceService ServiceService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Lista usług</PageTitle>
+
+<h3>Lista usług kosmetycznych</h3>
+
+<a href="/service/create" class="btn btn-primary mb-3">
+    Dodaj usługę
+</a>
+
+<RadzenDataGrid Data="@services" TItem="ServiceDto" AllowPaging="true" PageSize="5" AllowSorting="true" AllowFiltering="true">
+    <Columns>
+        <RadzenDataGridColumn TItem="ServiceDto" Property="Name" Title="Nazwa" />
+        <RadzenDataGridColumn TItem="ServiceDto" Property="Description" Title="Opis" />
+        <RadzenDataGridColumn TItem="ServiceDto" Property="Price" Title="Cena" />
+        <RadzenDataGridColumn TItem="ServiceDto" Property="DurationMinutes" Title="Czas trwania" />
+
+        <RadzenDataGridColumn TItem="ServiceDto" Title="Akcje">
+            <Template Context="service">
+                <RadzenButton Text="Szczegóły" ButtonStyle="ButtonStyle.Info" Size="ButtonSize.Small" Click="@(() => Details(service.Id))" />
+                <RadzenButton Text="Edytuj" ButtonStyle="ButtonStyle.Warning" Size="ButtonSize.Small" Click="@(() => Edit(service.Id))" />
+                <RadzenButton Text="Usuń" ButtonStyle="ButtonStyle.Danger" Size="ButtonSize.Small" Click="@(() => Delete(service.Id))" />
+            </Template>
+        </RadzenDataGridColumn>
+    </Columns>
+</RadzenDataGrid>
+
+@code {
+    private IEnumerable<ServiceDto> services = new List<ServiceDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        services = await ServiceService.GetAllAsync();
+    }
+
+    private void Details(int id)
+    {
+        NavigationManager.NavigateTo($"/service/details/{id}");
+    }
+    private void Edit(int id)
+    {
+        NavigationManager.NavigateTo($"/service/edit/{id}");
+    }
+    private async Task Delete(int id)
+    {
+        await ServiceService.DeleteAsync(id);
+
+        services = await ServiceService.GetAllAsync();
+    }
+}

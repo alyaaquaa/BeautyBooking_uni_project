@@ -1,0 +1,58 @@
+﻿@page "/client/create"
+
+@inject IClientClientService ClientService
+@inject NavigationManager NavigationManager
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<h3>Dodaj klienta</h3>
+
+
+<EditForm Model="model" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Imię</label>
+        <InputText class="form-control" @bind-Value="model.FirstName" />
+    </div>
+
+    <div class="mb-3">
+        <label>Nazwisko</label>
+        <InputText class="form-control" @bind-Value="model.LastName" />
+    </div>
+
+    <div class="mb-3">
+        <label>Email</label>
+        <InputText class="form-control" @bind-Value="model.Email" />
+    </div>
+
+    <div class="mb-3">
+        <label>Telefon</label>
+        <InputText class="form-control" @bind-Value="model.PhoneNumber" />
+    </div>
+
+    <button class="btn btn-success" type="submit">Zapisz</button>
+    <a href="/client" class="btn btn-secondary ms-2">Anuluj</a>
+</EditForm>
+
+@code {
+    private CreateClientDto model = new();
+
+    private async Task Create()
+    {
+        try
+        {
+            await ClientService.CreateAsync(model);
+            NavigationManager.NavigateTo("/client");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+    private string? errorMessage;
+}

@@ -1,0 +1,51 @@
+﻿@page "/login"
+
+@inject IAuthClientService AuthService
+@inject NavigationManager NavigationManager
+
+<h3>Logowanie</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="model" OnValidSubmit="LoginUser">
+    <DataAnnotationsValidator />
+
+    <div class="mb-3">
+        <label>Email <span class="text-danger">*</span></label>
+        <InputText class="form-control" @bind-Value="model.Email" />
+        <ValidationMessage For="@(() => model.Email)" />
+    </div>
+
+    <div class="mb-3">
+        <label>Hasło <span class="text-danger">*</span></label>
+        <InputText class="form-control" type="password" @bind-Value="model.Password" />
+        <ValidationMessage For="@(() => model.Password)" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Zaloguj</button>
+
+    <a href="/register" class="btn btn-secondary ms-2">Rejestracja</a>
+</EditForm>
+
+@code {
+    private LoginDto model = new();
+    private string? errorMessage;
+
+    private async Task LoginUser()
+    {
+        errorMessage = null;
+
+        var user = await AuthService.LoginAsync(model);
+
+        if (user == null)
+        {
+            errorMessage = "Nieprawidłowy email lub hasło.";
+            return;
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+}

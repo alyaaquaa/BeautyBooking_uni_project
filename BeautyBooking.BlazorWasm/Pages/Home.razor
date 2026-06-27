@@ -1,0 +1,86 @@
+﻿@page "/"
+
+@inject IClientClientService ClientService
+@inject IServiceClientService ServiceService
+@inject IEmployeeClientService EmployeeService
+@inject IReservationClientService ReservationService
+@inject IPaymentClientService PaymentService
+
+<h1>BeautyBooking Dashboard</h1>
+
+@if (isLoading)
+{
+    <p>Ładowanie danych...</p>
+}
+else
+{
+    <div class="row">
+
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Klienci</h5>
+                    <h2>@clientsCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Usługi</h5>
+                    <h2>@servicesCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Pracownicy</h5>
+                    <h2>@employeesCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Rezerwacje</h5>
+                    <h2>@reservationsCount</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>Płatności</h5>
+                    <h2>@paymentsCount</h2>
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+@code {
+
+    private bool isLoading = true;
+
+    private int clientsCount;
+    private int servicesCount;
+    private int employeesCount;
+    private int reservationsCount;
+    private int paymentsCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientsCount = (await ClientService.GetAllAsync()).Count();
+        servicesCount = (await ServiceService.GetAllAsync()).Count();
+        employeesCount = (await EmployeeService.GetAllAsync()).Count();
+        reservationsCount = (await ReservationService.GetAllAsync()).Count();
+        paymentsCount = (await PaymentService.GetAllAsync()).Count();
+
+        isLoading = false;
+    }
+}

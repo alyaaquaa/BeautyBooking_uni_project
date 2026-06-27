@@ -1,0 +1,7 @@
+BeautyBooking
+
+Regulamin salonu kosmetycznego.
+
+1. Rezerwacjê mo¿na odwo³aæ najpóŸniej 24h przed wizyt¹.
+2. P³atnoœæ gotówk¹ lub kart¹.
+3. Prosimy o punktualne przybycie.

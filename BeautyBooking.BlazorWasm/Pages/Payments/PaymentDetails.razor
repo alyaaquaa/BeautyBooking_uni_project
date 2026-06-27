@@ -1,0 +1,35 @@
+﻿@page "/payment/details/{Id:int}"
+
+@inject IPaymentClientService PaymentService
+@inject NavigationManager NavigationManager
+
+<h3>Szczegóły płatności</h3>
+
+@if (payment == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <p><strong>Rezerwacja ID:</strong> @payment.ReservationId</p>
+    <p><strong>Kwota:</strong> @payment.Amount zł</p>
+    <p><strong>Data płatności:</strong> @payment.PaymentDate.ToString("yyyy-MM-dd")</p>
+    <p><strong>Metoda:</strong> @payment.PaymentMethod</p>
+    <p><strong>Opłacone:</strong> @(payment.IsPaid ? "Tak" : "Nie")</p>
+
+    <button class="btn btn-secondary" @onclick="Back">Powrót</button>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PaymentDto? payment;
+
+    protected override async Task OnInitializedAsync()
+    {
+        payment = await PaymentService.GetByIdAsync(Id);
+    }
+
+    private void Back() => NavigationManager.NavigateTo("/payment");
+}

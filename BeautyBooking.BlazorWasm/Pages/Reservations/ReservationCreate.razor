@@ -1,0 +1,128 @@
+﻿@page "/reservation/create"
+
+@inject IReservationClientService ReservationService
+@inject IClientClientService ClientService
+@inject IEmployeeClientService EmployeeService
+@inject IServiceClientService ServiceService
+@inject NavigationManager NavigationManager
+
+<h3>Dodaj rezerwację</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="model" OnValidSubmit="Create">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label>Klient</label>
+        <InputSelect class="form-control" @bind-Value="model.ClientId">
+            <option value="0">-- wybierz klienta --</option>
+            @foreach (var client in clients)
+            {
+                <option value="@client.Id">@client.FirstName @client.LastName</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+        <label>Pracownik</label>
+        <InputSelect class="form-control" @bind-Value="model.EmployeeId">
+            <option value="0">-- wybierz pracownika --</option>
+            @foreach (var employee in employees)
+            {
+                <option value="@employee.Id">@employee.FirstName @employee.LastName - @employee.Position</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="mb-3">
+   
+        <div class="mb-3">
+            <label>Usługi</label>
+
+            @foreach (var service in services)
+            {
+                <div class="form-check">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           checked="@model.ServiceIds.Contains(service.Id)"
+                           @onchange="e => ToggleService(service.Id, e.Value)" />
+
+                    <label class="form-check-label">
+                        @service.Name - @service.Price zł
+                    </label>
+                </div>
+            }
+        </div>
+
+    </div>
+
+    <div class="mb-3">
+        <label>Data rezerwacji</label>
+        <InputDate class="form-control" @bind-Value="model.ReservationDate" />
+    </div>
+
+    <div class="mb-3">
+        <label>Status</label>
+        <InputText class="form-control" @bind-Value="model.Status" />
+    </div>
+
+    <div class="mb-3">
+        <label>Uwagi</label>
+        <InputText class="form-control" @bind-Value="model.Notes" />
+    </div>
+
+    <button class="btn btn-success" type="submit">Zapisz</button>
+    <a href="/reservation" class="btn btn-secondary ms-2">Anuluj</a>
+</EditForm>
+
+@code {
+    private CreateReservationDto model = new();
+
+    private IEnumerable<ClientDto> clients = new List<ClientDto>();
+    private IEnumerable<EmployeeDto> employees = new List<EmployeeDto>();
+    private IEnumerable<ServiceDto> services = new List<ServiceDto>();
+
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await ClientService.GetAllAsync();
+        employees = await EmployeeService.GetAllAsync();
+        services = await ServiceService.GetAllAsync();
+
+        model.ReservationDate = DateTime.Now.AddDays(1);
+        model.Status = "Nowa";
+    }
+
+    private async Task Create()
+    {
+        try
+        {
+            await ReservationService.CreateAsync(model);
+            NavigationManager.NavigateTo("/reservation");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+    private void ToggleService(int serviceId, object? value)
+{
+    bool isChecked = value is bool b && b;
+
+    if (isChecked)
+    {
+        if (!model.ServiceIds.Contains(serviceId))
+            model.ServiceIds.Add(serviceId);
+    }
+    else
+    {
+        model.ServiceIds.Remove(serviceId);
+    }
+}
+}

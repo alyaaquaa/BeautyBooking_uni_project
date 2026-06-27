@@ -1,0 +1,94 @@
+﻿@page "/payment"
+
+@inject IPaymentClientService PaymentService
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject IAuthClientService AuthService
+@inject IReservationClientService ReservationService
+
+<h3>Lista płatności</h3>
+
+@if (AuthService.CurrentUser?.Role == "Employee")
+{
+    <a href="/payment/create" class="btn btn-primary mb-3">Dodaj płatność</a>
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Rezerwacja ID</th>
+            <th>Kwota</th>
+            <th>Data płatności</th>
+            <th>Metoda</th>
+            <th>Opłacone</th>
+            <th>Akcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var payment in payments)
+        {
+            <tr>
+                <td>@payment.ReservationId</td>
+                <td>@payment.Amount zł</td>
+                <td>@payment.PaymentDate.ToString("yyyy-MM-dd")</td>
+                <td>@payment.PaymentMethod</td>
+                <td>@(payment.IsPaid ? "Tak" : "Nie")</td>
+                <td>
+                    <button class="btn btn-info btn-sm" @onclick="() => Details(payment.Id)">Szczegóły</button>
+                    @if (AuthService.CurrentUser?.Role == "Employee")
+                    {
+                        <button class="btn btn-warning btn-sm" @onclick="() => Edit(payment.Id)">Edytuj</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDelete(payment.Id)">
+                            Usuń
+                        </button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private IEnumerable<PaymentDto> payments = new List<PaymentDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var allPayments = await PaymentService.GetAllAsync();
+
+        if (AuthService.CurrentUser?.Role == "Client")
+        {
+            var myReservations = await ReservationService.GetAllAsync();
+
+            var myReservationIds = myReservations
+                .Where(r => r.ClientId == AuthService.CurrentUser.ClientId)
+                .Select(r => r.Id)
+                .ToList();
+
+            payments = allPayments
+                .Where(p => myReservationIds.Contains(p.ReservationId))
+                .ToList();
+        }
+        else
+        {
+            payments = allPayments;
+        }
+    }
+
+    private void Details(int id) => NavigationManager.NavigateTo($"/payment/details/{id}");
+
+    private void Edit(int id) => NavigationManager.NavigateTo($"/payment/edit/{id}");
+
+
+    private async Task ConfirmDelete(int id)
+    {
+        bool result = await JS.InvokeAsync<bool>(
+            "confirm",
+            "Czy na pewno chcesz usunąć rekord?"
+        );
+        if (result)
+        {
+            await PaymentService.DeleteAsync(id);
+            payments = await PaymentService.GetAllAsync(); 
+        }
+	}
+}

@@ -1,0 +1,37 @@
+﻿@page "/service/details/{Id:int}"
+
+@using BeautyBooking.SharedKernel.Dto
+@using BeautyBooking.Application.Services
+
+@inject IServiceService ServiceService
+
+<h3>Szczegóły usługi</h3>
+
+@if (service == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h4>@service.Name</h4>
+
+            <p><strong>Opis:</strong> @service.Description</p>
+            <p><strong>Cena:</strong> @service.Price zł</p>
+            <p><strong>Czas trwania:</strong> @service.DurationMinutes min</p>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ServiceDto? service;
+
+    protected override async Task OnInitializedAsync()
+    {
+        service = await ServiceService.GetByIdAsync(Id);
+    }
+}

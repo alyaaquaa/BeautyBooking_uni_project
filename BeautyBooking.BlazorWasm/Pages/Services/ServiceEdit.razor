@@ -1,0 +1,73 @@
+﻿@page "/service/edit/{Id:int}"
+
+@inject IServiceClientService ServiceService
+@inject NavigationManager NavigationManager
+
+<h3>Edytuj usługę</h3>
+
+@if (model == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <EditForm Model="model" OnValidSubmit="Update">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label>Nazwa</label>
+            <InputText class="form-control" @bind-Value="model.Name" />
+        </div>
+
+        <div class="mb-3">
+            <label>Opis</label>
+            <InputText class="form-control" @bind-Value="model.Description" />
+        </div>
+
+        <div class="mb-3">
+            <label>Cena</label>
+            <InputNumber class="form-control" @bind-Value="model.Price" />
+        </div>
+
+        <div class="mb-3">
+            <label>Czas trwania</label>
+            <InputNumber class="form-control" @bind-Value="model.DurationMinutes" />
+        </div>
+
+        <button class="btn btn-success" type="submit">Zapisz</button>
+        <a href="/service" class="btn btn-secondary ms-2">Anuluj</a>
+    </EditForm>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UpdateServiceDto? model;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var service = await ServiceService.GetByIdAsync(Id);
+
+        if (service != null)
+        {
+            model = new UpdateServiceDto
+            {
+                Name = service.Name,
+                Description = service.Description,
+                Price = service.Price,
+                DurationMinutes = service.DurationMinutes
+            };
+        }
+    }
+
+    private async Task Update()
+    {
+        if (model != null)
+        {
+            await ServiceService.UpdateAsync(Id, model);
+            NavigationManager.NavigateTo("/service");
+        }
+    }
+}

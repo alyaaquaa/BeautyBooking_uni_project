@@ -1,0 +1,46 @@
+﻿@page "/service/details/{Id:int}"
+
+@inject IServiceClientService ServiceClientService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Szczegóły usługi</PageTitle>
+
+<h3>Szczegóły usługi — WebAssembly</h3>
+
+@if (service == null)
+{
+    <p>Ładowanie...</p>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <h4>@service.Name</h4>
+
+            <p><strong>Opis:</strong> @service.Description</p>
+            <p><strong>Cena:</strong> @service.Price zł</p>
+            <p><strong>Czas trwania:</strong> @service.DurationMinutes min</p>
+
+            <button class="btn btn-secondary" @onclick="Back">
+                Powrót
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private ServiceDto? service;
+
+    protected override async Task OnInitializedAsync()
+    {
+        service = await ServiceClientService.GetByIdAsync(Id);
+    }
+
+    private void Back()
+    {
+        NavigationManager.NavigateTo("/service");
+    }
+}
