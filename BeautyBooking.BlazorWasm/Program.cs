@@ -12,7 +12,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient
 {
-    BaseAddress = new Uri("http://localhost:5220")
+    BaseAddress = new Uri("https://beautybooking-uni-project.onrender.com/")
 });
 
 builder.Services.AddScoped<IServiceClientService, ServiceClientService>();
